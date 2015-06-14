@@ -1,16 +1,12 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
 Before any analysis, the raw data file must be unzipped and the contents of the
 unzipped CSV file read into R.
-```{r loadData,echo=TRUE,message=FALSE}
+
+```r
 library(dplyr)
 library(ggplot2)
 library(lubridate)
@@ -25,7 +21,8 @@ activity <- read.csv( "activity.csv", header=TRUE )
 Next we calculate the total number of steps taken per day (ignoring any missing
 data) and display this in a histogram.
 
-```{r totStepsPerDay,echo=TRUE}
+
+```r
 totStepsPerDay <- 
     na.omit(activity) %>% group_by(date) %>% summarise( total=sum(steps) )
 
@@ -34,11 +31,19 @@ hist( totStepsPerDay$total, breaks=10, col="cadetblue4", border="black",
 rug( totStepsPerDay$total, col="blue" )
 ```
 
+![](PA1_template_files/figure-html/totStepsPerDay-1.png) 
+
 The mean and median values of the total number of steps taken per day are
 computed as follows.
 
-```{r statsForTotalStepsPerDay,echo=TRUE}
+
+```r
 summary( totStepsPerDay$total )
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    8841   10760   10770   13290   21190
 ```
 
 ## What is the average daily activity pattern?
@@ -47,7 +52,8 @@ To examine this question we average and display the number of steps at
 each 5-minute interval in a day (using all available data and ignoring any 
 missing data).
 
-```{r avgDailyActivityPattern,echo=TRUE}
+
+```r
 avgDailyInts <- 
     na.omit( activity ) %>% group_by( interval ) %>% summarise( avg=mean(steps) )
 
@@ -69,6 +75,8 @@ ggplot( data=avgDailyInts, aes(x=interval, y=avg) ) +
         title="Average Number of Steps\nas a Function of Time-of-Day")
 ```
 
+![](PA1_template_files/figure-html/avgDailyActivityPattern-1.png) 
+
 The above graph shows the 5-minute interval with the maximum number of
 average steps
 
@@ -77,9 +85,14 @@ average steps
 
 There are a significant number of observations missing from the data
 set.
-```{r imputingMissingVals1,echo=TRUE}
+
+```r
 numMissingSteps <- sum(is.na(activity$steps))
 print(numMissingSteps)
+```
+
+```
+## [1] 2304
 ```
 
 To potentially ameliorate any impact of missing observations on the results
@@ -87,7 +100,8 @@ presented here, we have created a second data set where every missing observatio
 is replaced with the average number of steps for the 5-minute interval 
 corresponding to the missing observation.
 
-```{r imputingMissingVals2,echo=TRUE}
+
+```r
 idxMissingSteps <- which(is.na(activity$steps))
 
 revActivity <- activity
@@ -99,7 +113,8 @@ revActivity$steps[idxMissingSteps] <- round(
 From this revised data set we compute the total number of steps per day and 
 display a histogram of that data.
 
-```{r imputingMissingVals3,echo=TRUE}
+
+```r
 revTotStepsPerDay <- 
     revActivity %>% group_by(date) %>% summarise( total=sum(steps) )
 
@@ -109,12 +124,20 @@ hist( revTotStepsPerDay$total, breaks=10, col="cadetblue4", border="black",
 rug( revTotStepsPerDay$total, col="blue" )
 ```
 
+![](PA1_template_files/figure-html/imputingMissingVals3-1.png) 
+
 We can see that these efforts yield a data set with the same mean and median
 values as the original data set, and a histogram which closely follows that of
 the original data set.
 
-```{r imputingMissingVals4,echo=TRUE}
+
+```r
 summary( revTotStepsPerDay$total )
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    9819   10760   10770   12810   21190
 ```
 
 
@@ -124,7 +147,8 @@ To explore this question we compare the average number of steps taken during
 a particular 5-minute interval on the weekend with the same interval during the
 weekdays.
 
-```{r compareWeekendsToWeekdays,echo=TRUE}
+
+```r
 revActivity <-
     revActivity %>%
     mutate( 
@@ -147,3 +171,5 @@ ggplot( data=revAvgDailyInts, aes(x=interval, y=avg) ) +
         title=paste("Comparison of Average Number of Steps",
             "\nas a Function of Time-of-Day for Weekdays and Weekends") )
 ```
+
+![](PA1_template_files/figure-html/compareWeekendsToWeekdays-1.png) 
